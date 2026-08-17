@@ -1,5 +1,9 @@
 //src/features/panels.js
 
+
+window.Prioritab = window.Prioritab || {};
+window.Prioritab.priorities = window.Prioritab.priorities || {};
+
 // TODO: Get rid of this, since the update shit is useless (since I removed it)
 function flashUpdateFooter(updateFooter) {
     const { show, hide } = window.Prioritab.dom;
@@ -13,6 +17,7 @@ function flashUpdateFooter(updateFooter) {
 
 function initPanels() {
     const { qs, on, hide, show, isVisible } = window.Prioritab.dom;
+    const { listNames } = window.Prioritab.priorities.constants;
 
     document.addEventListener("click", (event) => {
         const customizeCorner = qs("#customize-corner");
@@ -24,12 +29,8 @@ function initPanels() {
             show(customizeButton, "inline");
         }
 
-        // TODO: Use the listnames constants to generate this
-        const listClassSuffixes = ["left", "mid", "right"];
-
-        for (const suffix of listClassSuffixes) {
+        for (const suffix of listNames) {
             const list = qs(`#list-${suffix}`);
-
             if (!list.contains(event.target)) {
                 const editPriorities = qs(".edit-priorities", list);
                 const editPrioritiesLink = qs(".edit-priorities-link", list);
@@ -43,14 +44,12 @@ function initPanels() {
 
     on(qs("#customize-button"), "click", (event) => {
         event.stopPropagation();
-
         hide(qs("#customize-button"));
         show(qs("#customize-selectors"));
     });
 
     on(qs("#hide-customize-selectors"), "click", (event) => {
         event.stopPropagation();
-
         hide(qs("#customize-selectors"));
         show(qs("#customize-button"), "inline");
     });
@@ -60,20 +59,14 @@ function initPanels() {
         function (result) {
             if (!result[PRIORITAB_DEFAULTS.storageKeys.update20151231]) {
                 flashUpdateFooter(qs("#update-footer"));
-
-                browser.storage.sync.set({
-                    [PRIORITAB_DEFAULTS.storageKeys.update20151231]: true
-                });
+                browser.storage.sync.set({ [PRIORITAB_DEFAULTS.storageKeys.update20151231]: true });
             }
         }
     );
 
     on(qs("#update-hide"), "click", () => {
         hide(qs("#update-footer"));
-
-        browser.storage.sync.set({
-            [PRIORITAB_DEFAULTS.storageKeys.update20151231]: true
-        });
+        browser.storage.sync.set({ [PRIORITAB_DEFAULTS.storageKeys.update20151231]: true });
     });
 
 }

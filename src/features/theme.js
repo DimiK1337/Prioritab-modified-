@@ -3,6 +3,7 @@
 const COLOR_CUSTOMIZATION_STYLE_ID = "color-customization";
 const colorCustomizationRules = new Map();
 
+// This function acts as a "singleton" ensuring that the extension creates a designated style tag for the todo-list view
 function getColorCustomizationStyleElement() {
     const styleEl = document.querySelector(`#${COLOR_CUSTOMIZATION_STYLE_ID}`) ?? document.createElement("style");
     if (!styleEl.id) {
@@ -37,35 +38,21 @@ function setColorProperty(classes, propToChange, newValue) {
 }
 
 function setColors() {
-    browser.storage.sync.get(
-        PRIORITAB_DEFAULTS.storageKeys.userBackgroundColor,
-        function (result) {
+    browser.storage.sync.get(PRIORITAB_DEFAULTS.storageKeys.userBackgroundColor, function (result) {
             const bgColor = result[PRIORITAB_DEFAULTS.storageKeys.userBackgroundColor] ?? PRIORITAB_DEFAULTS.colors.bg;
             setColorProperty("main-bg-color", "background-color", bgColor);
         }
     );
 
-    browser.storage.sync.get(
-        PRIORITAB_DEFAULTS.storageKeys.userFontColor,
-        function (result) {
+    browser.storage.sync.get(PRIORITAB_DEFAULTS.storageKeys.userFontColor, function (result) {
             const fontColor = result[PRIORITAB_DEFAULTS.storageKeys.userFontColor] ?? PRIORITAB_DEFAULTS.colors.font;
-            setColorProperty(
-                ["main-font-color", "main-border-color"],
-                "color",
-                fontColor
-            );
+            setColorProperty(["main-font-color", "main-border-color"], "color", fontColor);
         }
     );
 
-    browser.storage.sync.get(
-        PRIORITAB_DEFAULTS.storageKeys.userShadowColor,
-        function (result) {
+    browser.storage.sync.get(PRIORITAB_DEFAULTS.storageKeys.userShadowColor, function (result) {
             const shadowColor = result[PRIORITAB_DEFAULTS.storageKeys.userShadowColor] ?? PRIORITAB_DEFAULTS.colors.shadow;
-            setColorProperty(
-                ["shadow-color", "shadow-border-color"],
-                "color",
-                shadowColor
-            );
+            setColorProperty(["shadow-color", "shadow-border-color"], "color", shadowColor);
         }
     );
 }
@@ -94,13 +81,9 @@ function setDateTimeFormat() {
 
 function debounce(fn, delay = 500) {
     let timeoutID;
-
     return function (...args) {
         clearTimeout(timeoutID);
-
-        timeoutID = setTimeout(() => {
-            fn.apply(this, args);
-        }, delay);
+        timeoutID = setTimeout(() => { fn.apply(this, args); }, delay);
     };
 }
 
@@ -120,28 +103,21 @@ function createColorPickerInstance(
 
     const propType = isBackgroundColor ? "background-color" : "color";
 
-    browser.storage.sync.get(
-        { [storageSyncKey]: defaultColor },
+    browser.storage.sync.get({ [storageSyncKey]: defaultColor },
         function (result) {
             const savedColor = result[storageSyncKey] ?? defaultColor;
-
             input.value = savedColor;
             setColorProperty(cssClasses, propType, savedColor);
         }
     );
 
-    const saveColorDebounced = debounce(function () {
-        browser.storage.sync.set({
-            [storageSyncKey]: input.value
-        });
-    }, 500);
-
+    const saveColorDebounced = debounce(
+        function () { browser.storage.sync.set({ [storageSyncKey]: input.value }); }, 500
+    );
     input.addEventListener("input", function () {
         const nextColor = input.value;
-
         setColorProperty(cssClasses, propType, nextColor);
         saveColorDebounced();
     });
     return input;
 }
-

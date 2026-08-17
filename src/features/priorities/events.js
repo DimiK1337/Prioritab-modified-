@@ -135,11 +135,8 @@ window.Prioritab.priorities.events = (() => {
 
           const previousTodoCard = todoCard.previousElementSibling;
 
-          if (previousTodoCard?.matches('li.todo-card')) {
-            itemList.insertBefore(todoCard, previousTodoCard);
-          } else {
-            itemList.appendChild(todoCard);
-          }
+          if (previousTodoCard?.matches('li.todo-card')) itemList.insertBefore(todoCard, previousTodoCard);
+          else itemList.appendChild(todoCard);
 
           todoCard.focus();
           regenerateList();
@@ -152,11 +149,11 @@ window.Prioritab.priorities.events = (() => {
 
           if (nextTodoCard?.matches('li.todo-card')) {
             itemList.insertBefore(nextTodoCard, todoCard);
-          } else {
+          } 
+          else {
             const firstTodoCard = itemList.querySelector('li.todo-card');
             if (firstTodoCard) itemList.insertBefore(todoCard, firstTodoCard);
           }
-
           todoCard.focus();
           regenerateList();
         };

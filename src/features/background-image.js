@@ -53,15 +53,12 @@ function initBackgroundImage() {
         });
     }
 
-    browser.storage.local.get(
-        [PRIORITAB_DEFAULTS.storageKeys.userBackgroundImage],
-        function (result) {
-            const savedImage = result[PRIORITAB_DEFAULTS.storageKeys.userBackgroundImage];
-            if (savedImage) {
-                bodyEl.style.backgroundImage = `url("${savedImage}")`;
-            }
+    browser.storage.local.get([PRIORITAB_DEFAULTS.storageKeys.userBackgroundImage], function (result) {
+        const savedImage = result[PRIORITAB_DEFAULTS.storageKeys.userBackgroundImage];
+        if (savedImage) {
+            bodyEl.style.backgroundImage = `url("${savedImage}")`;
         }
-    );
+    });
 
     if (localStorage.setCentered === "center") {
         setBodyBackgroundPosition("center center");
@@ -82,10 +79,7 @@ function initBackgroundImage() {
     if (removeButton) {
         removeButton.addEventListener("click", function () {
             setBodyBackgroundImage(null);
-
-            browser.storage.local.set({
-                [PRIORITAB_DEFAULTS.storageKeys.userBackgroundImage]: null
-            }, function () {
+            browser.storage.local.set({ [PRIORITAB_DEFAULTS.storageKeys.userBackgroundImage]: null }, function () {
                 notifyFluidBackgroundImageChanged(false);
             });
         });

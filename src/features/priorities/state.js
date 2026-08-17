@@ -5,6 +5,7 @@ window.Prioritab.priorities = window.Prioritab.priorities || {};
 
 window.Prioritab.priorities.state = (() => {
   const state = {
+    // Generates the IDs for the todo lists
     counters: {
       left: 1,
       mid: 1,
