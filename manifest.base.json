@@ -7,6 +7,9 @@
   "chrome_url_overrides": {
     "newtab": "priority_tab_modern.html"
   },
+  "chrome_settings_overrides": {
+    "homepage": "priority_tab_modern.html"
+  },
   "permissions": [
     "storage",
     "unlimitedStorage"
