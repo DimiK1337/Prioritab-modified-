@@ -203,6 +203,14 @@
       </div>
       <br />
       <br />
+      <div id="customize-profile">
+        <h2>Profile</h2>
+        <button id="export-profile-button" class="cursor-pointer">Export Profile</button>
+        <input type="file" id="import-profile-input" accept=".json,application/json" hidden />
+        <button id="import-profile-button" class="cursor-pointer">Import Profile</button>
+        <div id="profile-message"></div>
+      </div>
+      <br />
       <button id="hide-customize-selectors" class="cursor-pointer">(Hide)</button>
     </div>
   </div>
@@ -236,6 +244,12 @@
   <script src="src/features/background-image.js"></script>
   <script src="src/features/panels.js"></script>
   <script src="src/features/priorities-ui.js"></script>
+
+  <script src="src/features/profile/actions.js"></script>
+  <script src="src/features/profile/validation.js"></script>
+  <script src="src/features/profile/events.js"></script>
+  <script src="src/features/profile/index.js"></script>
+
   <script src="src/features/fluid-bg.js"></script>
   <script src="src/app.js"></script>
 </body>

@@ -132,19 +132,16 @@ window.Prioritab.priorities.events = (() => {
 
         const handleArrowUp = () => {
           event.preventDefault();
-
           const previousTodoCard = todoCard.previousElementSibling;
 
           if (previousTodoCard?.matches('li.todo-card')) itemList.insertBefore(todoCard, previousTodoCard);
           else itemList.appendChild(todoCard);
-
           todoCard.focus();
           regenerateList();
         };
 
         const handleArrowDown = () => {
           event.preventDefault();
-
           const nextTodoCard = todoCard.nextElementSibling;
 
           if (nextTodoCard?.matches('li.todo-card')) {

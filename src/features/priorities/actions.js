@@ -34,7 +34,7 @@ window.Prioritab.priorities.actions = (() => {
     const {
       saveTodoText,
       removeTodoText,
-      copyTodoText,
+      moveTodoText,
       saveCounter,
       saveDones,
       saveOrder,
@@ -70,7 +70,7 @@ window.Prioritab.priorities.actions = (() => {
 
         item.id = newID;
         incrementListCounter(target);
-        copyTodoText(browser, oldID, newID);
+        moveTodoText(browser, oldID, newID);
 
         if (!checkIfCompleted(oldID)) return;
 
