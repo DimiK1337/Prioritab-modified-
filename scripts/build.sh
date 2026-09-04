@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
 
 select_build_mode() {
@@ -9,7 +10,7 @@ select_build_mode() {
         return
         ;;
       *)
-        echo "Usage: $0 [listed|unlisted]" >&2
+        echo "Usage: $0 [listed|unlisted] [firefox|chrome]" >&2
         exit 1
         ;;
     esac
@@ -20,21 +21,63 @@ select_build_mode() {
 
   while [[ "$mode" != "unlisted" && "$mode" != "listed" ]]; do
     echo "Select build mode:" >&2
-    echo "  1) unlisted  - includes update_url for self-distributed builds" >&2
-    echo "  2) listed    - removes update_url for public AMO listing" >&2
+    echo "  1) unlisted  - includes update_url for self-distributed Firefox builds" >&2
+    echo "  2) listed    - removes update_url for public store listing" >&2
+
     read -rp "Enter 1 or 2: " choice
 
     case "$choice" in
       1) mode="unlisted" ;;
       2) mode="listed" ;;
-      *) echo "Invalid choice. Please enter 1 or 2." >&2; echo >&2 ;;
+      *)
+        echo "Invalid choice. Please enter 1 or 2." >&2
+        echo >&2
+        ;;
     esac
   done
 
   echo "$mode"
 }
 
+select_browser() {
+  if [[ $# -gt 1 ]]; then
+    case "$2" in
+      firefox|chrome)
+        echo "$2"
+        return
+        ;;
+      *)
+        echo "Usage: $0 [listed|unlisted] [firefox|chrome]" >&2
+        exit 1
+        ;;
+    esac
+  fi
+
+  local browser=""
+  local choice=""
+
+  while [[ "$browser" != "firefox" && "$browser" != "chrome" ]]; do
+    echo "Select browser:" >&2
+    echo "  1) firefox" >&2
+    echo "  2) chrome" >&2
+
+    read -rp "Enter 1 or 2: " choice
+
+    case "$choice" in
+      1) browser="firefox" ;;
+      2) browser="chrome" ;;
+      *)
+        echo "Invalid choice. Please enter 1 or 2." >&2
+        echo >&2
+        ;;
+    esac
+  done
+
+  echo "$browser"
+}
+
 MODE="$(select_build_mode "$@")"
+BROWSER="$(select_browser "$@")"
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
@@ -85,25 +128,73 @@ find "$BUILD_DIR" -type f \( \
   -name ".DS_Store" \
 \) -delete
 
-node - "$ROOT_DIR/manifest.base.json" "$BUILD_DIR/manifest.json" "$MODE" <<'NODE'
+node - \
+  "$ROOT_DIR/manifest.base.json" \
+  "$BUILD_DIR/manifest.json" \
+  "$MODE" \
+  "$BROWSER" <<'NODE'
+
 const fs = require("fs");
 
-const [basePath, outPath, mode] = process.argv.slice(2);
-const manifest = JSON.parse(fs.readFileSync(basePath, "utf8"));
+const [
+  basePath,
+  outPath,
+  mode,
+  browser,
+] = process.argv.slice(2);
 
-manifest.browser_specific_settings ??= {};
-manifest.browser_specific_settings.gecko ??= {};
+const manifest = JSON.parse(
+  fs.readFileSync(basePath, "utf8")
+);
 
-if (mode === "listed") {
-  delete manifest.browser_specific_settings.gecko.update_url;
+/*
+ * Both browsers use the new-tab override.
+ */
+manifest.chrome_url_overrides ??= {};
+manifest.chrome_url_overrides.newtab =
+  "priority_tab_modern.html";
+
+if (browser === "firefox") {
+  /*
+   * Firefox can also override the browser homepage.
+   */
+  manifest.chrome_settings_overrides ??= {};
+  manifest.chrome_settings_overrides.homepage =
+    "priority_tab_modern.html";
+
+  /*
+   * Firefox-specific manifest metadata.
+   */
+  manifest.browser_specific_settings ??= {};
+  manifest.browser_specific_settings.gecko ??= {};
+
+  if (mode === "listed") {
+    delete manifest.browser_specific_settings.gecko.update_url;
+  }
+
+  if (mode === "unlisted") {
+    manifest.browser_specific_settings.gecko.update_url =
+      "https://raw.githubusercontent.com/DimiK1337/Priority-Tab-Modern/master/updates.json?raw=1";
+  }
 }
 
-if (mode === "unlisted") {
-  manifest.browser_specific_settings.gecko.update_url =
-    "https://raw.githubusercontent.com/DimiK1337/Priority-Tab-Modern/master/updates.json?raw=1";
+if (browser === "chrome") {
+  /*
+   * Chrome does not accept the Firefox homepage override here.
+   */
+  delete manifest.chrome_settings_overrides;
+
+  /*
+   * Remove Firefox-only manifest metadata.
+   */
+  delete manifest.browser_specific_settings;
 }
 
-fs.writeFileSync(outPath, JSON.stringify(manifest, null, 2) + "\n");
+fs.writeFileSync(
+  outPath,
+  JSON.stringify(manifest, null, 2) + "\n"
+);
+
 NODE
 
-echo "Built $MODE extension in: $BUILD_DIR"
+echo "Built $MODE $BROWSER extension in: $BUILD_DIR"
