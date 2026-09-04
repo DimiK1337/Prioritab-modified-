@@ -27,7 +27,9 @@ window.onload = function () {
     initPanels();
     initPrioritiesUi();
 
+    window.Prioritab.profile.index.init();
     window.Prioritab.priorities.index.init();
+
 
     createColorPickerInstance(
         "#background-color-selector",
